@@ -88,7 +88,7 @@ export function GitHubCommandCenter() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-3 gap-3 md:gap-8 mb-12">
           {/* Total Stars */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -96,14 +96,14 @@ export function GitHubCommandCenter() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <GlassPanel hoverable className="flex flex-col items-center justify-center p-8 text-center h-full">
-              <div className="w-16 h-16 rounded-full bg-amber-100/50 flex items-center justify-center mb-6 shadow-inner border border-amber-200/50">
-                <Star className="w-8 h-8 text-amber-500" />
+            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-amber-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-amber-200/50">
+                <Star className="w-5 h-5 md:w-8 md:h-8 text-amber-500" />
               </div>
-              <h3 className="text-5xl font-bold text-slate-800 mb-2">
+              <h3 className="text-2xl md:text-5xl font-bold text-slate-800 mb-0.5 md:mb-2">
                 {loading ? '...' : stats.stars}
               </h3>
-              <p className="text-slate-500 font-medium uppercase tracking-wider text-sm">Total Stars</p>
+              <p className="text-slate-500 font-medium uppercase tracking-wider text-[9px] md:text-sm">Stars</p>
             </GlassPanel>
           </motion.div>
 
@@ -114,14 +114,14 @@ export function GitHubCommandCenter() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <GlassPanel hoverable className="flex flex-col items-center justify-center p-8 text-center h-full">
-              <div className="w-16 h-16 rounded-full bg-emerald-100/50 flex items-center justify-center mb-6 shadow-inner border border-emerald-200/50">
-                <FolderGit2 className="w-8 h-8 text-emerald-500" />
+            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-emerald-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-emerald-200/50">
+                <FolderGit2 className="w-5 h-5 md:w-8 md:h-8 text-emerald-500" />
               </div>
-              <h3 className="text-5xl font-bold text-slate-800 mb-2">
+              <h3 className="text-2xl md:text-5xl font-bold text-slate-800 mb-0.5 md:mb-2">
                 {loading ? '...' : stats.repos}
               </h3>
-              <p className="text-slate-500 font-medium uppercase tracking-wider text-sm">Public Repos</p>
+              <p className="text-slate-500 font-medium uppercase tracking-wider text-[9px] md:text-sm">Repos</p>
             </GlassPanel>
           </motion.div>
 
@@ -132,13 +132,14 @@ export function GitHubCommandCenter() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <GlassPanel hoverable className="flex flex-col items-center justify-center p-8 text-center h-full relative overflow-hidden">
-              <div className="w-16 h-16 rounded-full bg-blue-100/50 flex items-center justify-center mb-6 shadow-inner border border-blue-200/50 z-10">
-                <Code2 className="w-8 h-8 text-blue-500" />
+            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full relative overflow-hidden">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-blue-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-blue-200/50 z-10">
+                <Code2 className="w-5 h-5 md:w-8 md:h-8 text-blue-500" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-4 z-10">Language Ranking</h3>
               
-              <div className="w-full space-y-3 z-10">
+              {/* Desktop View */}
+              <h3 className="hidden md:block text-2xl font-bold text-slate-800 mb-4 z-10">Language Ranking</h3>
+              <div className="hidden md:block w-full space-y-3 z-10">
                 {displayLanguages.map((lang, index) => (
                   <div key={lang.name}>
                     <div className="flex justify-between text-sm mb-1">
@@ -161,6 +162,14 @@ export function GitHubCommandCenter() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Mobile View */}
+              <div className="md:hidden flex flex-col items-center z-10">
+                <h3 className="text-xl font-bold text-slate-800 mb-0.5 truncate max-w-full">
+                  {displayLanguages[0]?.name || 'Code'}
+                </h3>
+                <p className="text-slate-500 font-medium uppercase tracking-wider text-[9px]">Top Lang</p>
               </div>
             </GlassPanel>
           </motion.div>

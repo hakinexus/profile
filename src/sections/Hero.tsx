@@ -5,8 +5,19 @@ import { GlassPanel } from '../components/GlassPanel';
 import { Github } from 'lucide-react';
 
 export function Hero() {
+  const scrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const offsetTop = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: offsetTop - 100,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-32">
       <HeroBlob />
       
       <div className="relative z-10 container mx-auto px-6 flex flex-col items-center text-center">
@@ -28,11 +39,11 @@ export function Hero() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <MagneticButton variant="glass" className="text-lg px-8 py-4">
+            <MagneticButton variant="glass" className="text-lg px-8 py-4" onClick={() => scrollTo('work')}>
               View My Arsenal
             </MagneticButton>
             
-            <MagneticButton variant="secondary" className="text-lg px-8 py-4">
+            <MagneticButton variant="secondary" className="text-lg px-8 py-4" onClick={() => scrollTo('contact')}>
               Let's Connect
             </MagneticButton>
           </div>
@@ -57,11 +68,11 @@ export function Hero() {
         </GlassPanel>
       </motion.div>
       
-      {/* Scroll indicator */}
+      {/* Scroll indicator - Hidden on very small screens to prevent overflow */}
       <motion.div 
         animate={{ y: [0, 10, 0] }}
         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-60"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-3 opacity-60"
       >
         <span className="text-xs uppercase tracking-[0.3em] font-bold text-slate-500">Scroll</span>
         <div className="w-[1px] h-16 bg-gradient-to-b from-slate-500 to-transparent" />

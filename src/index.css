@@ -13,7 +13,30 @@
   body {
     @apply font-sans text-slate-text antialiased overflow-x-hidden;
     background: #fdfdfd;
-    cursor: none; /* Hide default cursor for custom liquid cursor */
+  }
+  
+  @media (hover: hover) and (pointer: fine) {
+    body {
+      cursor: none; /* Hide default cursor for custom liquid cursor */
+    }
+  }
+
+  /* Lenis smooth scrolling styles */
+  html.lenis, html.lenis body {
+    height: auto;
+    width: 100%;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
   }
   
   /* Add a subtle noise overlay to the body for a premium textured feel */
@@ -47,6 +70,14 @@
 }
 
 @layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .glass-panel {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
     backdrop-filter: blur(24px) saturate(180%);
@@ -81,6 +112,7 @@
       radial-gradient(at 80% 100%, hsla(240, 100%, 90%, 1) 0px, transparent 50%),
       radial-gradient(at 0% 0%, hsla(343, 100%, 90%, 1) 0px, transparent 50%);
     background-size: 200% 200%;
+    background-attachment: fixed;
     animation: mesh-gradient 15s ease infinite alternate;
   }
 }

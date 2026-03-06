@@ -1,20 +1,19 @@
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { GlassPanel } from '../components/GlassPanel';
+import { Code2, Database, Server, Layout, Smartphone, Cpu, Globe, Layers } from 'lucide-react';
 
 const techStack = [
-  { name: 'React', level: 'Expert', color: 'bg-cyan-400', size: 'w-32 h-32', delay: 0 },
-  { name: 'TypeScript', level: 'Expert', color: 'bg-blue-500', size: 'w-28 h-28', delay: 0.2 },
-  { name: 'Node.js', level: 'Advanced', color: 'bg-emerald-500', size: 'w-24 h-24', delay: 0.4 },
-  { name: 'Next.js', level: 'Expert', color: 'bg-slate-800', size: 'w-36 h-36', delay: 0.1 },
-  { name: 'Tailwind', level: 'Expert', color: 'bg-sky-400', size: 'w-20 h-20', delay: 0.3 },
-  { name: 'Framer', level: 'Advanced', color: 'bg-fuchsia-500', size: 'w-24 h-24', delay: 0.5 },
-  { name: 'Three.js', level: 'Proficient', color: 'bg-slate-900', size: 'w-28 h-28', delay: 0.2 },
-  { name: 'GraphQL', level: 'Proficient', color: 'bg-pink-500', size: 'w-20 h-20', delay: 0.6 },
+  { name: 'React', level: 'Expert', percentage: 95, color: 'bg-cyan-400', icon: Layout },
+  { name: 'TypeScript', level: 'Expert', percentage: 90, color: 'bg-blue-500', icon: Code2 },
+  { name: 'Node.js', level: 'Advanced', percentage: 85, color: 'bg-emerald-500', icon: Server },
+  { name: 'Next.js', level: 'Expert', percentage: 92, color: 'bg-slate-800', icon: Globe },
+  { name: 'Tailwind CSS', level: 'Expert', percentage: 98, color: 'bg-sky-400', icon: Layers },
+  { name: 'Framer Motion', level: 'Advanced', percentage: 80, color: 'bg-fuchsia-500', icon: Smartphone },
+  { name: 'Three.js', level: 'Proficient', percentage: 65, color: 'bg-slate-900', icon: Cpu },
+  { name: 'PostgreSQL', level: 'Proficient', percentage: 70, color: 'bg-blue-400', icon: Database },
 ];
 
 export function TechStack() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   return (
     <section className="py-32 relative z-10 overflow-hidden">
       <div className="container mx-auto px-6">
@@ -29,78 +28,56 @@ export function TechStack() {
             The Liquid Core
           </h2>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            My primary tools and technologies, ranked by proficiency.
+            My primary tools and technologies, engineered for high-performance applications.
           </p>
         </motion.div>
 
-        <div 
-          ref={containerRef}
-          className="relative h-[600px] w-full max-w-4xl mx-auto flex items-center justify-center"
-        >
-          {/* We use CSS animations for the floating effect to keep it lightweight, 
-              combined with framer-motion for the initial reveal */}
-          {techStack.map((tech, index) => {
-            // Calculate a random position within a radius
-            const angle = (index / techStack.length) * Math.PI * 2;
-            const radius = 150 + Math.random() * 100;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-
-            return (
-              <motion.div
-                key={tech.name}
-                initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
-                whileInView={{ opacity: 1, scale: 1, x, y }}
-                viewport={{ once: true }}
-                transition={{ 
-                  duration: 0.8, 
-                  delay: tech.delay,
-                  type: 'spring',
-                  stiffness: 100,
-                  damping: 15
-                }}
-                className="absolute"
-                style={{
-                  // Add a subtle continuous floating animation using CSS
-                  animation: `float ${3 + Math.random() * 2}s ease-in-out infinite alternate`,
-                  animationDelay: `${Math.random() * 2}s`
-                }}
-              >
-                <div 
-                  className={`
-                    ${tech.size} rounded-full flex flex-col items-center justify-center
-                    glass-panel border-2 border-white/60 shadow-xl
-                    transition-transform duration-300 hover:scale-110 cursor-hover
-                    relative overflow-hidden group
-                  `}
-                >
-                  {/* Subtle color tint based on the tech */}
-                  <div className={`absolute inset-0 opacity-20 ${tech.color} mix-blend-overlay`} />
-                  
-                  {/* Glare effect */}
-                  <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full" />
-                  
-                  <div className="flex flex-col items-center justify-center z-10 drop-shadow-sm">
-                    <span className="font-bold text-slate-800 text-center px-2">
-                      {tech.name}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600/80 mt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {techStack.map((tech, index) => (
+            <motion.div
+              key={tech.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="h-full"
+            >
+              <GlassPanel hoverable className="p-6 group relative overflow-hidden h-full flex flex-col justify-between">
+                {/* Subtle background glow on hover */}
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-500 ${tech.color}`} />
+                
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="p-3 rounded-xl bg-white/50 backdrop-blur-sm border border-white/60 shadow-sm group-hover:scale-110 transition-transform duration-500">
+                      <tech.icon className="w-6 h-6 text-slate-700" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/40 px-2.5 py-1 rounded-md border border-white/50">
                       {tech.level}
                     </span>
                   </div>
+                  <h3 className="text-xl font-bold text-slate-800 mb-1">{tech.name}</h3>
                 </div>
-              </motion.div>
-            );
-          })}
+
+                <div className="mt-8">
+                  <div className="flex justify-between text-xs font-semibold text-slate-500 mb-2">
+                    <span>Proficiency</span>
+                    <span>{tech.percentage}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-200/50 rounded-full overflow-hidden relative">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${tech.percentage}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.5, delay: 0.2 + index * 0.1, ease: "easeOut" }}
+                      className={`absolute top-0 left-0 h-full ${tech.color} rounded-full`}
+                    />
+                  </div>
+                </div>
+              </GlassPanel>
+            </motion.div>
+          ))}
         </div>
       </div>
-      
-      <style>{`
-        @keyframes float {
-          0% { transform: translateY(0px) translateX(0px); }
-          100% { transform: translateY(-20px) translateX(10px); }
-        }
-      `}</style>
     </section>
   );
 }

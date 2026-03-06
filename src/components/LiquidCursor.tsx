@@ -36,7 +36,7 @@ export function LiquidCursor() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-6 h-6 rounded-full pointer-events-none z-50 mix-blend-difference"
+      className="hidden md:block fixed top-0 left-0 w-6 h-6 rounded-full pointer-events-none z-50 mix-blend-difference"
       style={{
         background: 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(4px)',
