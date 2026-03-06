@@ -10,7 +10,7 @@ interface CardStackProps {
 
 export function CardStack({ children, index, total, className }: CardStackProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [topPosition, setTopPosition] = useState(`calc(var(--header-height, 80px) + ${index * 12}px)`);
+  const [topPosition, setTopPosition] = useState('0px');
 
   useEffect(() => {
     const calculatePosition = () => {
@@ -18,7 +18,11 @@ export function CardStack({ children, index, total, className }: CardStackProps)
       
       const windowHeight = window.innerHeight;
       const cardHeight = cardRef.current.offsetHeight;
-      const headerOffset = 80 + (index * 12); // Base offset + stacking offset
+      
+      // Set headerOffset to 0 so cards stick to the very top of the screen.
+      // This allows them to go behind the floating header pill and completely
+      // cover the previous cards, fixing the visual bug where previous sections peek through.
+      const headerOffset = 0;
       
       // If the card is taller than the viewport (minus the header offset),
       // we need to let it scroll to its bottom before it sticks.

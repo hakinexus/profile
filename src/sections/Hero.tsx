@@ -10,7 +10,7 @@ export function Hero() {
     if (element) {
       const offsetTop = element.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: offsetTop - 100,
+        top: offsetTop, // Scroll exactly to the anchor (0 offset) since cards now stick to 0px
         behavior: 'smooth'
       });
     }
