@@ -1,15 +1,44 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useSpring, useTransform, useInView } from 'framer-motion';
 import { GitHubCalendar } from 'react-github-calendar';
 import { GlassPanel } from '../components/GlassPanel';
-import { Star, Code2, Activity, Trophy, FolderGit2 } from 'lucide-react';
+import { Star, Code2, Activity, Trophy, FolderGit2, Calendar as CalendarIcon, Palette } from 'lucide-react';
+import { Tooltip } from '../components/Tooltip';
 
 // Change this to your actual GitHub username
 const GITHUB_USERNAME = 'hakinexus';
 
+function CountUp({ to }: { to: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const spring = useSpring(0, { mass: 0.8, stiffness: 75, damping: 15 });
+  const rounded = useTransform(spring, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    if (inView) {
+      spring.set(to);
+    }
+  }, [inView, to, spring]);
+
+  return <motion.span ref={ref}>{rounded}</motion.span>;
+}
+
+const THEMES = {
+  indigo: ['#f1f5f9', '#c7d2fe', '#818cf8', '#4f46e5', '#312e81'],
+  emerald: ['#f0fdf4', '#bbf7d0', '#4ade80', '#16a34a', '#14532d'],
+  rose: ['#fff1f2', '#fecdd3', '#fb7185', '#e11d48', '#881337'],
+  amber: ['#fffbeb', '#fde68a', '#f59e0b', '#b45309', '#78350f'],
+};
+
+type ThemeKey = keyof typeof THEMES;
+
 export function GitHubCommandCenter() {
   const [stats, setStats] = useState({ stars: 0, repos: 0, languages: [] as {name: string, percentage: number}[] });
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState<number | 'last'>('last');
+  const [theme, setTheme] = useState<ThemeKey>('indigo');
+  const currentYear = new Date().getFullYear();
+  const years = ['last', currentYear, currentYear - 1, currentYear - 2];
 
   useEffect(() => {
     async function fetchGitHubData() {
@@ -95,13 +124,18 @@ export function GitHubCommandCenter() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ y: -5 }}
           >
-            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full">
-              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-amber-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-amber-200/50">
+            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full group">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-amber-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-amber-200/50 group-hover:scale-110 transition-transform duration-300">
                 <Star className="w-5 h-5 md:w-8 md:h-8 text-amber-500" />
               </div>
               <h3 className="text-2xl md:text-5xl font-bold text-slate-800 mb-0.5 md:mb-2">
-                {loading ? '...' : stats.stars}
+                {loading ? (
+                  <div className="h-8 w-16 bg-slate-200 animate-pulse rounded mx-auto" />
+                ) : (
+                  <CountUp to={stats.stars} />
+                )}
               </h3>
               <p className="text-slate-500 font-medium uppercase tracking-wider text-[9px] md:text-sm">Stars</p>
             </GlassPanel>
@@ -113,13 +147,18 @@ export function GitHubCommandCenter() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{ y: -5 }}
           >
-            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full">
-              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-emerald-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-emerald-200/50">
+            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full group">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-emerald-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-emerald-200/50 group-hover:scale-110 transition-transform duration-300">
                 <FolderGit2 className="w-5 h-5 md:w-8 md:h-8 text-emerald-500" />
               </div>
               <h3 className="text-2xl md:text-5xl font-bold text-slate-800 mb-0.5 md:mb-2">
-                {loading ? '...' : stats.repos}
+                {loading ? (
+                  <div className="h-8 w-16 bg-slate-200 animate-pulse rounded mx-auto" />
+                ) : (
+                  <CountUp to={stats.repos} />
+                )}
               </h3>
               <p className="text-slate-500 font-medium uppercase tracking-wider text-[9px] md:text-sm">Repos</p>
             </GlassPanel>
@@ -131,43 +170,56 @@ export function GitHubCommandCenter() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ y: -5 }}
           >
-            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full relative overflow-hidden">
-              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-blue-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-blue-200/50 z-10">
+            <GlassPanel hoverable className="flex flex-col items-center justify-center p-3 md:p-8 text-center h-full relative overflow-hidden group">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-blue-100/50 flex items-center justify-center mb-2 md:mb-6 shadow-inner border border-blue-200/50 z-10 group-hover:scale-110 transition-transform duration-300">
                 <Code2 className="w-5 h-5 md:w-8 md:h-8 text-blue-500" />
               </div>
               
               {/* Desktop View */}
               <h3 className="hidden md:block text-2xl font-bold text-slate-800 mb-4 z-10">Language Ranking</h3>
               <div className="hidden md:block w-full space-y-3 z-10">
-                {displayLanguages.map((lang, index) => (
-                  <div key={lang.name}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-slate-700 flex items-center gap-2">
-                        <span className={`text-xs font-bold ${colors[index]?.text || 'text-slate-500'} ${colors[index]?.badge || 'bg-slate-50'} px-1.5 py-0.5 rounded`}>
-                          #{index + 1}
-                        </span> 
-                        {lang.name}
-                      </span>
-                      <span className="text-slate-500">{lang.percentage}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-200/50 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${lang.percentage}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.5 + (index * 0.1) }}
-                        className={`h-full ${colors[index]?.bg || 'bg-slate-400'} rounded-full`} 
-                      />
-                    </div>
+                {loading ? (
+                  <div className="space-y-2 w-full">
+                    <div className="h-4 bg-slate-200 animate-pulse rounded w-3/4" />
+                    <div className="h-4 bg-slate-200 animate-pulse rounded w-1/2" />
+                    <div className="h-4 bg-slate-200 animate-pulse rounded w-2/3" />
                   </div>
-                ))}
+                ) : (
+                  displayLanguages.map((lang, index) => (
+                    <div key={lang.name}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium text-slate-700 flex items-center gap-2">
+                          <span className={`text-xs font-bold ${colors[index]?.text || 'text-slate-500'} ${colors[index]?.badge || 'bg-slate-50'} px-1.5 py-0.5 rounded`}>
+                            #{index + 1}
+                          </span> 
+                          {lang.name}
+                        </span>
+                        <span className="text-slate-500">{lang.percentage}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-200/50 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${lang.percentage}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1, delay: 0.5 + (index * 0.1) }}
+                          className={`h-full ${colors[index]?.bg || 'bg-slate-400'} rounded-full`} 
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Mobile View */}
               <div className="md:hidden flex flex-col items-center z-10">
                 <h3 className="text-xl font-bold text-slate-800 mb-0.5 truncate max-w-full">
-                  {displayLanguages[0]?.name || 'Code'}
+                  {loading ? (
+                    <div className="h-6 w-20 bg-slate-200 animate-pulse rounded" />
+                  ) : (
+                    displayLanguages[0]?.name || 'Code'
+                  )}
                 </h3>
                 <p className="text-slate-500 font-medium uppercase tracking-wider text-[9px]">Top Lang</p>
               </div>
@@ -182,25 +234,95 @@ export function GitHubCommandCenter() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <GlassPanel className="p-8 overflow-hidden">
-            <div className="flex items-center gap-3 mb-6">
-              <Activity className="w-6 h-6 text-indigo-500" />
-              <h3 className="text-2xl font-bold text-slate-800">Contribution Activity</h3>
+          <GlassPanel className="p-4 md:p-8 overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <Activity className={`w-6 h-6 text-${theme === 'indigo' ? 'indigo' : theme === 'emerald' ? 'emerald' : theme === 'rose' ? 'rose' : 'amber'}-500 transition-colors duration-300`} />
+                <h3 className="text-xl md:text-2xl font-bold text-slate-800">Contribution Activity</h3>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                {/* Theme Switcher */}
+                <div className="flex items-center gap-1 bg-slate-100/80 backdrop-blur-sm rounded-lg p-1 border border-slate-200/60 shadow-sm mr-2">
+                  {(Object.keys(THEMES) as ThemeKey[]).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTheme(t)}
+                      className={`w-5 h-5 rounded-md transition-all ${
+                        theme === t 
+                          ? 'ring-2 ring-offset-1 ring-slate-300 scale-110 shadow-sm' 
+                          : 'hover:scale-110 opacity-70 hover:opacity-100'
+                      }`}
+                      style={{ backgroundColor: THEMES[t][3] }}
+                      title={`Switch to ${t} theme`}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex bg-slate-100/80 backdrop-blur-sm rounded-lg p-1 border border-slate-200/60 shadow-sm">
+                  {years.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => setSelectedYear(year as number | 'last')}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                        selectedYear === year
+                          ? 'bg-white text-slate-800 shadow-sm border border-slate-200/50'
+                          : 'text-slate-500 hover:text-slate-700 hover:bg-white/40'
+                      }`}
+                    >
+                      {year === 'last' ? 'Last 365 Days' : year}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 inline-block w-fit">
+                  Showing public contributions
+                </p>
+              </div>
             </div>
             
-            <div className="w-full overflow-x-auto pb-4 flex justify-center">
-              <div className="min-w-max p-4 bg-white/40 rounded-xl border border-white/60 shadow-inner">
-                <GitHubCalendar 
-                  username={GITHUB_USERNAME} 
-                  colorScheme="light"
-                  theme={{
-                    light: ['#e2e8f0', '#c7d2fe', '#818cf8', '#4f46e5', '#312e81'],
-                  }}
-                  fontSize={12}
-                  blockSize={12}
-                  blockMargin={4}
-                  blockRadius={3}
-                />
+            <div className="p-6 bg-white/40 rounded-2xl border border-white/60 shadow-inner text-slate-700 transition-colors duration-500">
+              <div className="w-full overflow-x-auto pb-2">
+                <div className="w-max mx-auto min-w-full">
+                  <GitHubCalendar 
+                    username={GITHUB_USERNAME} 
+                    year={selectedYear}
+                    colorScheme="light"
+                    theme={{
+                      light: THEMES[theme],
+                    }}
+                    fontSize={12}
+                    blockSize={13}
+                    blockMargin={4}
+                    blockRadius={3}
+                    showColorLegend={false}
+                    showTotalCount={true}
+                    showWeekdayLabels={['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']}
+                    renderBlock={(block, activity) => (
+                      <Tooltip content={`${activity.count} contributions on ${activity.date}`}>
+                        {block}
+                      </Tooltip>
+                    )}
+                    labels={{
+                      months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                      totalCount: `{{count}} contributions in ${selectedYear === 'last' ? 'the last year' : selectedYear}`,
+                    }}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-end gap-2 text-xs text-slate-600 mt-2 px-1">
+                <span>Less</span>
+                <div className="flex gap-1">
+                  {THEMES[theme].map((color) => (
+                    <div 
+                      key={color} 
+                      className="w-[13px] h-[13px] rounded-[3px] transition-colors duration-500" 
+                      style={{ backgroundColor: color }} 
+                    />
+                  ))}
+                </div>
+                <span>More</span>
               </div>
             </div>
           </GlassPanel>

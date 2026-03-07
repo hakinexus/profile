@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassPanel } from '../components/GlassPanel';
 import { MagneticButton } from '../components/MagneticButton';
-import { Star, GitFork, ExternalLink, Github, Loader2 } from 'lucide-react';
+import { Star, GitFork, ExternalLink, Github, Loader2, Clock } from 'lucide-react';
+import { getRelativeTime } from '../utils/time';
 
 const GITHUB_USERNAME = 'hakinexus';
 
@@ -15,6 +16,7 @@ interface Repo {
   forks_count: number;
   html_url: string;
   homepage: string;
+  pushed_at: string;
 }
 
 export function ProjectShowcase() {
@@ -26,7 +28,7 @@ export function ProjectShowcase() {
   useEffect(() => {
     async function fetchRepos() {
       try {
-        const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+        const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=pushed&per_page=100`);
         const data = await res.json();
         
         if (Array.isArray(data)) {
@@ -175,11 +177,17 @@ export function ProjectShowcase() {
                             </div>
                           </div>
                           <p className="text-slate-600 flex-grow line-clamp-3">{project.description}</p>
-                          <div className="mt-6">
+                          <div className="mt-6 flex items-center justify-between">
                             {project.language && (
                               <span className="text-xs font-semibold uppercase tracking-wider text-indigo-500 bg-indigo-50/50 px-3 py-1 rounded-full border border-indigo-100/50">
                                 {project.language}
                               </span>
+                            )}
+                            {project.pushed_at && (
+                              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-slate-100/80 px-2.5 py-1 rounded-full border border-slate-200/60">
+                                <Clock className="w-3.5 h-3.5" />
+                                {getRelativeTime(project.pushed_at)}
+                              </div>
                             )}
                           </div>
                         </div>
