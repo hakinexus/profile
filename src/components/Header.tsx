@@ -1,7 +1,8 @@
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { MagneticButton } from './MagneticButton';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Github } from 'lucide-react';
+import { getRelativeTime } from '../utils/time';
 
 const GITHUB_USERNAME = 'hakinexus';
 
@@ -11,6 +12,7 @@ export function Header() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState('about');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [lastCommitTime, setLastCommitTime] = useState<string | null>(null);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > 50);
@@ -23,6 +25,23 @@ export function Header() {
         if (data.avatar_url) setAvatarUrl(data.avatar_url);
       })
       .catch(console.error);
+
+    async function fetchLastCommit() {
+      try {
+        const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=5`);
+        const events = await res.json();
+        
+        if (Array.isArray(events) && events.length > 0) {
+          const latestEvent = events.find(e => e.type === 'PushEvent') || events[0];
+          if (latestEvent && latestEvent.created_at) {
+            setLastCommitTime(getRelativeTime(latestEvent.created_at));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch last commit:", error);
+      }
+    }
+    fetchLastCommit();
   }, []);
 
   useEffect(() => {
@@ -84,7 +103,7 @@ export function Header() {
               H
             </div>
           )}
-          <span className="font-extrabold tracking-tight">Hakinexus</span>
+          <span className="font-extrabold tracking-tight hidden sm:block">Hakinexus</span>
         </div>
         
         {/* Desktop Nav */}
@@ -130,13 +149,29 @@ export function Header() {
           </MagneticButton>
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button 
-          className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors pointer-events-auto"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile Right Section */}
+        <div className="flex md:hidden items-center gap-3">
+          {/* Mobile Last Active Indicator */}
+          {lastCommitTime && (
+            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/80 shadow-sm">
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </div>
+              <span className="text-[10px] font-bold text-slate-700 flex items-center gap-1">
+                <Github className="w-3 h-3" /> {lastCommitTime}
+              </span>
+            </div>
+          )}
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="p-2 text-slate-600 hover:text-slate-900 transition-colors pointer-events-auto"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Dropdown */}

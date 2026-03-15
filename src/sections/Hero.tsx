@@ -52,7 +52,7 @@ export function Hero() {
           initial={{ opacity: 0, y: -20, x: 20 }}
           animate={{ opacity: 1, y: 0, x: 0 }}
           transition={{ delay: 0.6, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute top-32 md:top-40 right-6 md:right-12 lg:right-24 z-30"
+          className="absolute top-32 md:top-40 right-6 md:right-12 lg:right-24 z-30 hidden md:block"
         >
           <motion.div
             animate={{ y: [0, -8, 0] }}

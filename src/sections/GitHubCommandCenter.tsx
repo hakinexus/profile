@@ -3,7 +3,7 @@ import { motion, useSpring, useTransform, useInView } from 'framer-motion';
 import { GitHubCalendar } from 'react-github-calendar';
 import { GlassPanel } from '../components/GlassPanel';
 import { Star, Code2, Activity, Trophy, FolderGit2, Calendar as CalendarIcon, Palette } from 'lucide-react';
-import { Tooltip } from '../components/Tooltip';
+import React from 'react';
 
 // Change this to your actual GitHub username
 const GITHUB_USERNAME = 'hakinexus';
@@ -213,10 +213,10 @@ export function GitHubCommandCenter() {
               </div>
 
               {/* Mobile View */}
-              <div className="md:hidden flex flex-col items-center z-10">
-                <h3 className="text-xl font-bold text-slate-800 mb-0.5 truncate max-w-full">
+              <div className="md:hidden flex flex-col items-center z-10 w-full px-1">
+                <h3 className="text-lg font-bold text-slate-800 mb-0.5 break-words text-center w-full leading-tight">
                   {loading ? (
-                    <div className="h-6 w-20 bg-slate-200 animate-pulse rounded" />
+                    <div className="h-6 w-20 bg-slate-200 animate-pulse rounded mx-auto" />
                   ) : (
                     displayLanguages[0]?.name || 'Code'
                   )}
@@ -287,6 +287,7 @@ export function GitHubCommandCenter() {
                     username={GITHUB_USERNAME} 
                     year={selectedYear}
                     colorScheme="light"
+                    errorMessage="Could not fetch GitHub data. Please try again later."
                     theme={{
                       light: THEMES[theme],
                     }}
@@ -297,11 +298,11 @@ export function GitHubCommandCenter() {
                     showColorLegend={false}
                     showTotalCount={true}
                     showWeekdayLabels={['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']}
-                    renderBlock={(block, activity) => (
-                      <Tooltip content={`${activity.count} contributions on ${activity.date}`}>
-                        {block}
-                      </Tooltip>
-                    )}
+                    tooltips={{
+                      activity: {
+                        text: (activity) => `${activity.count} contributions on ${activity.date}`,
+                      }
+                    }}
                     labels={{
                       months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                       weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
