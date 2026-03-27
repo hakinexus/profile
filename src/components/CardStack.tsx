@@ -137,7 +137,7 @@ export function CardStack({ children, index, total, className }: CardStackProps)
           "w-full overflow-hidden",
           isMobile ? "relative" : "sticky",
           // Remove blur entirely on mobile for massive performance gain, keep 2xl on desktop
-          "bg-white/90 md:bg-white/40 md:backdrop-blur-2xl border-t border-white/60 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]",
+          "bg-white/90 md:bg-white/40 md:backdrop-blur-2xl border-t border-white/60 shadow-none md:shadow-[0_-10px_40px_rgba(0,0,0,0.05)]",
           "rounded-t-[2rem] md:rounded-t-[3rem]",
           "pb-24 md:pb-32",
           className

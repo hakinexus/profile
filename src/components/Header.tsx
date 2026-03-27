@@ -46,21 +46,25 @@ export function Header() {
 
   useEffect(() => {
     const sections = ['about', 'work', 'tech', 'contact'];
+    const ratios = new Map<string, number>();
     
     const observer = new IntersectionObserver((entries) => {
-      // Find the most visible section
-      let maxRatio = 0;
-      let currentActive = activeSection;
-      
       entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-          maxRatio = entry.intersectionRatio;
-          currentActive = entry.target.id;
+        ratios.set(entry.target.id, entry.intersectionRatio);
+      });
+      
+      let maxRatio = 0;
+      let bestSection = '';
+      
+      ratios.forEach((ratio, id) => {
+        if (ratio > maxRatio) {
+          maxRatio = ratio;
+          bestSection = id;
         }
       });
       
-      if (maxRatio > 0) {
-        setActiveSection(currentActive);
+      if (bestSection) {
+        setActiveSection(bestSection);
       }
     }, {
       root: null,
@@ -74,7 +78,7 @@ export function Header() {
     });
 
     return () => observer.disconnect();
-  }, [activeSection]);
+  }, []);
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement | HTMLDivElement>, id: string) => {
     e.preventDefault();

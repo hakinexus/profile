@@ -37,8 +37,15 @@ export function GitHubCommandCenter() {
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<number | 'last'>('last');
   const [theme, setTheme] = useState<ThemeKey>('indigo');
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const currentYear = new Date().getFullYear();
   const years = ['last', currentYear, currentYear - 1, currentYear - 2];
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     async function fetchGitHubData() {
@@ -100,8 +107,8 @@ export function GitHubCommandCenter() {
     <section className="py-32 relative z-10">
       <div className="container mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
           className="mb-16 text-center"
@@ -120,8 +127,8 @@ export function GitHubCommandCenter() {
         <div className="grid grid-cols-3 gap-3 md:gap-8 mb-12">
           {/* Total Stars */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            whileInView={isMobile ? undefined : { opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
             whileHover={{ y: -5 }}
@@ -143,8 +150,8 @@ export function GitHubCommandCenter() {
 
           {/* Public Repos */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            whileInView={isMobile ? undefined : { opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
             whileHover={{ y: -5 }}
@@ -166,8 +173,8 @@ export function GitHubCommandCenter() {
 
           {/* Top Languages */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            whileInView={isMobile ? undefined : { opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
             whileHover={{ y: -5 }}
@@ -200,8 +207,8 @@ export function GitHubCommandCenter() {
                       </div>
                       <div className="h-2 w-full bg-slate-200/50 rounded-full overflow-hidden">
                         <motion.div 
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${lang.percentage}%` }}
+                          initial={isMobile ? { width: `${lang.percentage}%` } : { width: 0 }}
+                          whileInView={isMobile ? undefined : { width: `${lang.percentage}%` }}
                           viewport={{ once: true }}
                           transition={{ duration: 1, delay: 0.5 + (index * 0.1) }}
                           className={`h-full ${colors[index]?.bg || 'bg-slate-400'} rounded-full`} 
@@ -229,8 +236,8 @@ export function GitHubCommandCenter() {
 
         {/* Activity Heatmap */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >

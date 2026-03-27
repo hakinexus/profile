@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { GlassPanel } from '../components/GlassPanel';
 import { Code2, Database, Server, Layout, Smartphone, Cpu, Globe, Layers } from 'lucide-react';
 
@@ -14,12 +15,20 @@ const techStack = [
 ];
 
 export function TechStack() {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <section className="py-32 relative z-10 overflow-hidden">
       <div className="container mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
           className="mb-16 text-center"
@@ -36,8 +45,8 @@ export function TechStack() {
           {techStack.map((tech, index) => (
             <motion.div
               key={tech.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="h-full"
@@ -65,8 +74,8 @@ export function TechStack() {
                   </div>
                   <div className="h-1.5 w-full bg-slate-200/50 rounded-full overflow-hidden relative">
                     <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${tech.percentage}%` }}
+                      initial={isMobile ? { width: `${tech.percentage}%` } : { width: 0 }}
+                      whileInView={isMobile ? undefined : { width: `${tech.percentage}%` }}
                       viewport={{ once: true }}
                       transition={{ duration: 1.5, delay: 0.2 + index * 0.1, ease: "easeOut" }}
                       className={`absolute top-0 left-0 h-full ${tech.color} rounded-full`}
