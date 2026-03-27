@@ -80,7 +80,8 @@ function Blob({ isMobile }: { isMobile: boolean }) {
 export function HeroBlob() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { margin: "0px 0px 200px 0px" });
+  // Trigger out of view immediately when it leaves the screen
+  const isInView = useInView(containerRef, { margin: "0px" });
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -91,16 +92,19 @@ export function HeroBlob() {
 
   return (
     <div ref={containerRef} className="absolute inset-0 z-0 pointer-events-none">
-      <Canvas 
-        camera={{ position: [0, 0, 8], fov: 45 }} 
-        dpr={isMobile ? 1 : [1, 2]}
-        frameloop={isInView ? "always" : "never"}
-      >
-        <ambientLight intensity={1.5} />
-        <directionalLight position={[10, 10, 10]} intensity={2} />
-        <Environment preset="city" />
-        <Blob isMobile={isMobile} />
-      </Canvas>
+      {/* Completely unmount the Canvas when out of view to free up 100% of GPU memory */}
+      {isInView && (
+        <Canvas 
+          camera={{ position: [0, 0, 8], fov: 45 }} 
+          dpr={isMobile ? 1 : [1, 2]}
+          frameloop="always"
+        >
+          <ambientLight intensity={1.5} />
+          <directionalLight position={[10, 10, 10]} intensity={2} />
+          <Environment preset="city" />
+          <Blob isMobile={isMobile} />
+        </Canvas>
+      )}
     </div>
   );
 }

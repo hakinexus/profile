@@ -4,8 +4,19 @@ import { motion } from 'framer-motion';
 export function LiquidCursor() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches : false);
 
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
+    };
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return; // Completely disable on mobile
+
     const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
@@ -32,11 +43,13 @@ export function LiquidCursor() {
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, []);
+  }, [isMobile]);
+
+  if (isMobile) return null; // Don't even render the motion.div on mobile
 
   return (
     <motion.div
-      className="hidden md:block fixed top-0 left-0 w-6 h-6 rounded-full pointer-events-none z-50 mix-blend-difference"
+      className="fixed top-0 left-0 w-6 h-6 rounded-full pointer-events-none z-50 mix-blend-difference"
       style={{
         background: 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(4px)',

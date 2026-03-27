@@ -45,27 +45,36 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['about', 'work', 'tech', 'contact'];
-      let current = 'about';
+    const sections = ['about', 'work', 'tech', 'contact'];
+    
+    const observer = new IntersectionObserver((entries) => {
+      // Find the most visible section
+      let maxRatio = 0;
+      let currentActive = activeSection;
       
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          // If the top of the anchor is above the middle of the viewport
-          if (rect.top <= window.innerHeight / 2) {
-            current = section;
-          }
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+          maxRatio = entry.intersectionRatio;
+          currentActive = entry.target.id;
         }
+      });
+      
+      if (maxRatio > 0) {
+        setActiveSection(currentActive);
       }
-      setActiveSection(current);
-    };
+    }, {
+      root: null,
+      rootMargin: '-20% 0px -60% 0px', // Trigger when section is in the top/middle of screen
+      threshold: [0, 0.25, 0.5, 0.75, 1]
+    });
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    sections.forEach(section => {
+      const element = document.getElementById(section);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [activeSection]);
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement | HTMLDivElement>, id: string) => {
     e.preventDefault();
