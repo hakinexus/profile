@@ -39,11 +39,16 @@ export function ProjectShowcase() {
         const data = await res.json();
         
         if (Array.isArray(data)) {
-          // Filter out forks and repos without descriptions, then sort by stars
+          // Filter out forks, then sort by stars and recent activity
           const validRepos = data
-            .filter(repo => !repo.fork && repo.description)
-            .sort((a, b) => b.stargazers_count - a.stargazers_count)
-            .slice(0, 6); // Top 6 projects
+            .filter(repo => !repo.fork)
+            .sort((a, b) => {
+              if (b.stargazers_count !== a.stargazers_count) {
+                return b.stargazers_count - a.stargazers_count;
+              }
+              return new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime();
+            })
+            .slice(0, 12); // Show up to 12 projects
 
           setProjects(validRepos);
 
@@ -183,7 +188,7 @@ export function ProjectShowcase() {
                               <span className="flex items-center gap-1"><GitFork className="w-4 h-4 text-slate-400" /> {project.forks_count}</span>
                             </div>
                           </div>
-                          <p className="text-slate-600 flex-grow line-clamp-3">{project.description}</p>
+                          <p className="text-slate-600 flex-grow line-clamp-3">{project.description || 'No description provided for this repository.'}</p>
                           <div className="mt-6 flex items-center justify-between">
                             {project.language && (
                               <span className="text-xs font-semibold uppercase tracking-wider text-indigo-500 bg-indigo-50/50 px-3 py-1 rounded-full border border-indigo-100/50">
