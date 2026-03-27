@@ -1,6 +1,7 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { MeshTransmissionMaterial, Environment, Float, MeshDistortMaterial } from '@react-three/drei';
+import { useInView } from 'framer-motion';
 import * as THREE from 'three';
 
 function Blob({ isMobile }: { isMobile: boolean }) {
@@ -77,7 +78,9 @@ function Blob({ isMobile }: { isMobile: boolean }) {
 }
 
 export function HeroBlob() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { margin: "0px 0px 200px 0px" });
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -87,8 +90,12 @@ export function HeroBlob() {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none">
-      <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={isMobile ? 1 : [1, 2]}>
+    <div ref={containerRef} className="absolute inset-0 z-0 pointer-events-none">
+      <Canvas 
+        camera={{ position: [0, 0, 8], fov: 45 }} 
+        dpr={isMobile ? 1 : [1, 2]}
+        frameloop={isInView ? "always" : "never"}
+      >
         <ambientLight intensity={1.5} />
         <directionalLight position={[10, 10, 10]} intensity={2} />
         <Environment preset="city" />

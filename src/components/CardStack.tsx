@@ -10,39 +10,50 @@ interface CardStackProps {
 
 export function CardStack({ children, index, total, className }: CardStackProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [topPosition, setTopPosition] = useState('0px');
+  const markerRef = useRef<HTMLDivElement>(null);
+  const [topPosition, setTopPosition] = useState(0);
+  const triggerYRef = useRef(0);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
   useEffect(() => {
     const calculatePosition = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+
       if (!cardRef.current) return;
+      
+      // If switching to mobile, ensure styles are reset
+      if (mobile) {
+        cardRef.current.style.opacity = '1';
+        cardRef.current.style.visibility = 'visible';
+        cardRef.current.style.pointerEvents = 'auto';
+        return;
+      }
       
       const windowHeight = window.innerHeight;
       const cardHeight = cardRef.current.offsetHeight;
-      
-      // Set headerOffset to 0 so cards stick to the very top of the screen.
-      // This allows them to go behind the floating header pill and completely
-      // cover the previous cards, fixing the visual bug where previous sections peek through.
       const headerOffset = 0;
       
-      // If the card is taller than the viewport (minus the header offset),
-      // we need to let it scroll to its bottom before it sticks.
-      // So we set the top position to be a negative value that aligns its bottom with the viewport bottom.
+      let newTop = 0;
       if (cardHeight > windowHeight - headerOffset) {
-        // We want the bottom of the card to align with the bottom of the viewport.
-        // top = windowHeight - cardHeight
-        // But we also want to ensure it doesn't stick higher than the header offset if it somehow shrinks.
-        setTopPosition(`${windowHeight - cardHeight}px`);
+        newTop = windowHeight - cardHeight;
       } else {
-        // If it's shorter, just stick it below the header
-        setTopPosition(`${headerOffset}px`);
+        newTop = headerOffset;
+      }
+      setTopPosition(newTop);
+
+      // Pre-calculate the exact scroll Y where occlusion should happen
+      if (markerRef.current) {
+        const rect = markerRef.current.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const marginBottom = windowHeight * 0.4; // 40vh margin
+        triggerYRef.current = absoluteTop + cardHeight + marginBottom - newTop;
       }
     };
 
-    // Calculate initially and on resize
     calculatePosition();
     window.addEventListener('resize', calculatePosition);
     
-    // Also observe the element itself in case its content changes size
     const observer = new ResizeObserver(calculatePosition);
     if (cardRef.current) {
       observer.observe(cardRef.current);
@@ -54,30 +65,89 @@ export function CardStack({ children, index, total, className }: CardStackProps)
     };
   }, [index]);
 
+  useEffect(() => {
+    if (index === total - 1) return; // The last card never hides
+    if (isMobile) return; // Disable scroll listener entirely on mobile/iPad
+
+    let ticking = false;
+    let isCurrentlyHidden = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (!cardRef.current || isMobile) {
+            ticking = false;
+            return;
+          }
+
+          const scrollY = window.scrollY;
+          const triggerY = triggerYRef.current;
+          const fadeStart = triggerY - 400;
+
+          // Direct DOM mutation completely bypasses React's render cycle.
+          // This eliminates layout thrashing and guarantees 60fps scrolling.
+          if (scrollY >= triggerY) {
+            if (!isCurrentlyHidden) {
+              cardRef.current.style.opacity = '0';
+              cardRef.current.style.visibility = 'hidden';
+              cardRef.current.style.pointerEvents = 'none';
+              isCurrentlyHidden = true;
+            }
+          } else if (scrollY >= fadeStart) {
+            const progress = 1 - ((scrollY - fadeStart) / (triggerY - fadeStart));
+            cardRef.current.style.opacity = progress.toString();
+            cardRef.current.style.visibility = 'visible';
+            cardRef.current.style.pointerEvents = 'auto';
+            isCurrentlyHidden = false;
+          } else {
+            if (isCurrentlyHidden || cardRef.current.style.opacity !== '1') {
+              cardRef.current.style.opacity = '1';
+              cardRef.current.style.visibility = 'visible';
+              cardRef.current.style.pointerEvents = 'auto';
+              isCurrentlyHidden = false;
+            }
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [index, total, isMobile]);
+
   return (
-    <div
-      ref={cardRef}
-      style={{ 
-        top: topPosition,
-        zIndex: index + 10,
-        // Add margin bottom so the next card doesn't immediately cover this one when it sticks.
-        // The last card doesn't need this margin.
-        marginBottom: index === total - 1 ? '0' : '40vh',
-      }}
-      className={cn(
-        "sticky w-full overflow-hidden",
-        "bg-white/40 backdrop-blur-2xl border-t border-white/60 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]",
-        "rounded-t-[2rem] md:rounded-t-[3rem]",
-        // Add padding at the bottom so content doesn't get cut off by the next card
-        "pb-24 md:pb-32",
-        className
-      )}
-    >
-      {/* Inner glare effect for the glass card */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+    <>
+      <div ref={markerRef} className="w-full h-0" />
       
-      {children}
-    </div>
+      <div
+        ref={cardRef}
+        style={{ 
+          top: isMobile ? 'auto' : `${topPosition}px`,
+          zIndex: index + 10,
+          marginBottom: isMobile ? '0' : (index === total - 1 ? '0' : '40vh'),
+          // Force GPU acceleration to prevent paint lag on desktop
+          transform: isMobile ? 'none' : 'translateZ(0)',
+          willChange: isMobile ? 'auto' : 'transform, opacity, visibility',
+        }}
+        className={cn(
+          "w-full overflow-hidden",
+          isMobile ? "relative" : "sticky",
+          // Reduce blur slightly on mobile (xl instead of 2xl) for massive performance gain, keep 2xl on desktop
+          "bg-white/40 backdrop-blur-xl md:backdrop-blur-2xl border-t border-white/60 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]",
+          "rounded-t-[2rem] md:rounded-t-[3rem]",
+          "pb-24 md:pb-32",
+          className
+        )}
+      >
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+        
+        {children}
+      </div>
+    </>
   );
 }
